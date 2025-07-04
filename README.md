@@ -1,6 +1,6 @@
-# 👋 Welcome to Lifeworkz Limited on GitHub  
+# 👋 Welcome to Lifeworkz Limited on GitHub
 
-![Lifeworkz Banner](https://raw.githubusercontent.com/lifeworkz/lifeworkz/main/assets/lifeworkz-banner.png) <!-- Replace with actual hosted image or upload manually -->
+![Lifeworkz Banner](assets/Lifeworkz-banner.png)
 
 ---
 
@@ -25,8 +25,6 @@ We design and deliver technology, education, and empowerment solutions that just
 | **CSR Generator** | A lightweight Certificate Signing Request generator built for ease and security |
 | **Global Digital Transformations** | Delivering large-scale solutions in partnership with Genesys, Verint, NICE, and AWS |
 
-> 🛠️ We use this GitHub space to prototype, test, and share early-stage projects and ideas.
-
 ---
 
 ## 🌐 Connect With Us
@@ -34,9 +32,8 @@ We design and deliver technology, education, and empowerment solutions that just
 - 🔗 Website: [lifework.co.uk](https://www.lifework.co.uk)
 - 📧 Email: hello@lifework.co.uk
 - 💼 LinkedIn: [Christine Reid-Williams](https://www.linkedin.com/in/christine-reid-williams)
-- 🧠 TikTok: [@lifeworkz](https://www.tiktok.com/@lifeworkz)
+- 🧠 TikTok: [@lifeworkzglobal](https://www.tiktok.com/@lifeworkzglobal)
 
 ---
 
 > 💜 _Built with love and purpose by Lifeworkz – where life just workz._
-
