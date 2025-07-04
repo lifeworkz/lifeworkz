@@ -33,9 +33,9 @@ We design and deliver technology, education, and empowerment solutions that just
 
 - 🔗 Website: [lifework.co.uk](https://www.lifework.co.uk)
 - 📧 Email: hello@lifework.co.uk
-- 💼 LinkedIn:
+- 💼 LinkedIn:[https://www.linkedin.com/in/christine-reid-williams]
 
-- 🧠 TikTok: [@lifeworkzglobal](https://www.tiktok.com/@lifeworkzglobal)
+- 🧠 TikTok: [@lifeworkz](https://www.tiktok.com/@lifeworkz)
 
 ---
 
