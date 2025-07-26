@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 – Life doesn’t Workz!</title>
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #2e1365;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .emoji {
+      font-size: 64px;
+    }
+
+    .headline {
+      font-size: 36px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .broken-life {
+      text-decoration: line-through;
+      color: #f97316; /* orange stroke */
+      font-weight: bold;
+    }
+
+    .subline {
+      font-size: 18px;
+      margin: 20px 0;
+    }
+
+    .links a {
+      display: inline-block;
+      margin: 10px 0;
+      color: #2e1365;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    .logo {
+      margin-top: 30px;
+      max-width: 250px;
+    }
+
+    @media (max-width: 600px) {
+      .headline {
+        font-size: 28px;
+      }
+      .subline {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="emoji">😕</div>
+  <div class="headline">
+    Oops… <span class="broken-life">Life</span> <span style="font-style: italic;">doesn’t</span> Workz!
+  </div>
+
+  <p class="subline">Looks like this page wandered off to make a cuppa...</p>
+  <p class="subline">Your journey through LifeWorkz has hit a little snag. <br/>
+    But don’t worry — even when life doesn’t Workz,<br/>
+    we <em>still</em> connect the dots.</p>
+
+  <div class="links">
+    🔧 <a href="https://www.lifeworkz.co.uk">Click here to go back to www.lifeworkz.co.uk</a><br/>
+    📞 <a href="https://qrco.de/bfTeox" target="_blank">Message us on Business WhatsApp</a>
+  </div>
+
+  <img src="https://i.imgur.com/nPtJodN.png" alt="LifeWorkz Logo" class="logo" />
+
+</body>
+</html>
