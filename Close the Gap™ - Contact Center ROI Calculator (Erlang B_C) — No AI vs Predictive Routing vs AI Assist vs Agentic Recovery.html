@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<!-- saved from url=(0069)file:///Users/christinereid-williams/Downloads/cc_roi_calculator.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Center ROI Calculator (Erlang B/C) — No AI vs Predictive Routing vs AI Assist vs Agentic Recovery</title>
+<style>
+  :root{
+    --purple:#3c0365;
+    --orange:#FE7121;
+    --lime:#c9e265;
+    --bg:#0f0f12;
+    --card:#17171c;
+    --ink:#f5f7ff;
+    --muted:#a3a6b3;
+    --ok:#38c172;
+    --warn:#ffb400;
+  }
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+  header h1{font-size:22px;margin:0 0 8px}
+  header p{color:var(--muted);margin:0 0 16px}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:960px){.grid{grid-template-columns:420px 1fr}}
+  .card{background:linear-gradient(180deg,rgba(60,3,101,0.15),transparent),var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px}
+  .card h2{font-size:16px;margin:0 0 12px;color:#fff}
+  .row{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;margin-bottom:10px}
+  .row label{font-size:13px;color:var(--muted)}
+  .row input{width:100%;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#101016;color:#e9ecff}
+  .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#12121a;border:1px solid rgba(255,255,255,0.08);color:var(--muted);font-size:12px;margin-right:6px}
+  .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:#101018;border:1px solid rgba(255,255,255,0.08);}
+  .pill b{font-size:14px}
+  .pill small{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 0}
+  .kpi .card{padding:12px}
+  .kpi h3{margin:0;font-size:13px;color:var(--muted)}
+  .kpi p{margin:4px 0 0;font-size:18px;font-weight:700}
+  .bar{height:12px;background:#0d0d12;border-radius:999px;overflow:hidden}
+  .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--lime));width:0}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 0}
+  .legend .dot{width:10px;height:10px;border-radius:50%}
+  .lo{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px;margin-top:8px}
+  .btn{display:inline-block;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  .brand{display:flex;align-items:center;gap:8px}
+  .brand .logo{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--purple),var(--orange));}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="logo"></div>
+    <div>
+      <h1>Contact Center ROI — Erlang B/C Staffing &amp; AI Scenarios</h1>
+      <p>Lifeworkz Limited • Baseline vs Predictive Routing vs AI Assist vs Agentic Recovery</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card" id="inputs">
+      <h2>Demand &amp; Service Targets</h2>
+      <div class="row"><label>Voice contacts / hour (peak)</label><input type="number" id="callsPerHour" value="600"></div>
+      <div class="row"><label>Average Handle Time (AHT, seconds)</label><input type="number" id="aht" value="360"></div>
+      <div class="row"><label>Target Service Level (x% within T seconds)</label>
+        <div class="subgrid">
+          <input type="number" id="slp" value="80" placeholder="% within">
+          <input type="number" id="slt" value="20" placeholder="seconds">
+        </div>
+      </div>
+      <div class="row"><label>Forecast error (± % on volume)</label><input type="number" id="forecastErr" value="7"></div>
+      <div class="row"><label>Patience (median wait to abandon, seconds)</label><input type="number" id="patience" value="60"></div>
+      <div class="row"><label>Shrinkage (% non-productive time)</label><input type="number" id="shrink" value="30"></div>
+      <div class="row"><label>Occupancy target (%)</label><input type="number" id="occup" value="85"></div>
+      <div class="row"><label>FCR (First Contact Resolution, baseline %)</label><input type="number" id="fcr" value="72"></div>
+
+      <h2 style="margin-top:16px">Economics</h2>
+      <div class="row"><label>Cost per seat / month (£)</label><input type="number" id="seatCost" value="3500"></div>
+      <div class="row"><label>Training cost per new hire (£)</label><input type="number" id="trainCost" value="2500"></div>
+      <div class="row"><label>Attrition (annualised %)</label><input type="number" id="attrition" value="28"></div>
+      <div class="row"><label>Value per saved customer (£)</label><input type="number" id="valuePerSave" value="120"></div>
+      <div class="row"><label>Customers at risk per month</label><input type="number" id="custAtRisk" value="5000"></div>
+
+      <h2 style="margin-top:16px">Scenario Deltas (relative to baseline)</h2>
+      <p class="lo">Enter improvements (use negative for worse). Defaults are conservative.</p>
+      <div class="tag">AI Predictive Routing</div>
+      <div class="row"><label>Δ AHT (%)</label><input type="number" id="prAht" value="-8"></div>
+      <div class="row"><label>Δ FCR (p.p.)</label><input type="number" id="prFcr" value="5"></div>
+      <div class="row"><label>Δ Transfers (%)</label><input type="number" id="prXfer" value="-20"></div>
+
+      <div class="tag">AI Assist (Agent Copilot)</div>
+      <div class="row"><label>Δ AHT (%)</label><input type="number" id="aaAht" value="-15"></div>
+      <div class="row"><label>Δ FCR (p.p.)</label><input type="number" id="aaFcr" value="7"></div>
+      <div class="row"><label>Δ Attrition (p.p. annual)</label><input type="number" id="aaAttr" value="-5"></div>
+      <div class="row"><label>Training time reduction (%)</label><input type="number" id="aaTrain" value="20"></div>
+
+      <div class="tag">Agentic Recovery (abandon mop-up)</div>
+      <div class="row"><label>Recovered abandons (%)</label><input type="number" id="agRecover" value="35"></div>
+      <div class="row"><label>Churn reduction on at-risk (%)</label><input type="number" id="agChurn" value="12"></div>
+      <div class="row"><label>Δ FCR (p.p.)</label><input type="number" id="agFcr" value="4"></div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+        <button class="btn" id="runBtn">Recalculate</button>
+        <button class="btn" id="shareBtn">Export snapshot</button>
+        <small class="lo">Calculations are hourly for staffing and monthly for costs/ROI.</small>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Results</h2>
+      <div class="kpi" id="kpi">
+        <div class="card"><h3>Required FTE (peak hour)</h3><p id="kFTE">150</p></div>
+        <div class="card"><h3>ASA (seconds)</h3><p id="kASA">2</p></div>
+        <div class="card"><h3>Abandonment (%)</h3><p id="kABD">2.5%</p></div>
+        <div class="card"><h3>Service Level (%)</h3><p id="kSL">97.2%</p></div>
+      </div>
+
+      <div id="summary"><table><thead><tr><th>Scenario</th><th>FTE (gross)</th><th>ASA (s)</th><th>Abandon %</th><th>SL %</th><th>Cost / mo</th><th>Net Benefit</th><th>ROI</th></tr></thead><tbody><tr><td>Baseline (No AI)</td><td>150</td><td>2</td><td>2.5%</td><td>97.2%</td><td>£533,750</td><td>£0</td><td>0%</td></tr><tr><td>Predictive Routing</td><td>130</td><td>2</td><td>2.8%</td><td>96.9%</td><td>£462,583</td><td>£91,432</td><td>9143182%</td></tr><tr><td>AI Assist</td><td>118</td><td>2</td><td>3.4%</td><td>96.2%</td><td>£417,523</td><td>£143,880</td><td>14387962%</td></tr><tr><td>Agentic Recovery</td><td>143</td><td>2</td><td>2.5%</td><td>97.2%</td><td>£508,842</td><td>£113,334</td><td>11333377%</td></tr></tbody></table></div>
+      <div class="foot">Method: Erlang C staffing (search on N for target SL) with forecast buffer, occupancy cap &amp; shrinkage. Abandonment estimated via exponential patience with median parameter. ROI compares total monthly cost &amp; value captured vs baseline.</div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Scenario Comparison</h2>
+    <div id="chart"><svg viewBox="0 0 800 200" width="100%" height="220"><line x1="40" y1="160" x2="760" y2="160" stroke="rgba(255,255,255,0.2)"></line><rect x="40" y="50.90909090909091" width="30" height="109.0909090909091" fill="var(--orange)"></rect><rect x="76" y="160" width="30" height="0" fill="var(--lime)"></rect><text x="55" y="190" text-anchor="middle" font-size="12" fill="#a3a6b3">Baseline</text><rect x="160" y="65.45454545454545" width="30" height="94.54545454545455" fill="var(--orange)"></rect><rect x="196" y="141.3126366926665" width="30" height="18.687363307333506" fill="var(--lime)"></rect><text x="175" y="190" text-anchor="middle" font-size="12" fill="#a3a6b3">Predictive</text><rect x="280" y="74.66416861826698" width="30" height="85.33583138173302" fill="var(--orange)"></rect><rect x="316" y="130.59305185372833" width="30" height="29.406948146271663" fill="var(--lime)"></rect><text x="295" y="190" text-anchor="middle" font-size="12" fill="#a3a6b3">AI Assist</text><rect x="400" y="56" width="30" height="104" fill="var(--orange)"></rect><rect x="436" y="136.8361888327376" width="30" height="23.163811167262406" fill="var(--lime)"></rect><text x="415" y="190" text-anchor="middle" font-size="12" fill="#a3a6b3">Agentic</text></svg></div>
+    <div class="legend">
+      <div><span class="dot" style="background:var(--orange)"></span> Cost / Month (£)</div>
+      <div><span class="dot" style="background:var(--lime)"></span> Net Benefit vs Baseline (£)</div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Notes &amp; Assumptions</h2>
+    <ul>
+      <li><b>Erlang C:</b> We solve for minimum agents N such that Service Level ≥ target for given arrival rate λ and AHT. Offered load A = λ·AHT/3600.</li>
+      <li><b>Shrinkage:</b> Applied as gross-up on productive FTE. Forecast error adds a volume buffer on λ.</li>
+      <li><b>Abandonment:</b> Estimated via exponential patience with median τ; P(abandon) ≈ 1 − exp(−ASA/τ).</li>
+      <li><b>FCR impact:</b> Lower FCR increases repeat demand next period; we model a monthly multiplier on volume: 1/(FCR).</li>
+      <li><b>Economics:</b> Cost per seat includes salary/overheads. Attrition cost = hires × training cost; hires = headcount × (attrition/12).</li>
+      <li><b>Agentic Recovery:</b> Recovers a % of abandons and reduces churn on at-risk customers; value per save is user-defined.</li>
+    </ul>
+  </section>
+
+  <footer class="foot">© 2025 Lifeworkz Limited • “Analog Soul in a Digital World” — This tool is a modelling aid, not a promise.</footer>
+</div>
+
+<script>
+// ===== Erlang helpers =====
+function erlangB(E, m){
+  // blocking probability with m trunks (for reference)
+  let B = 1.0;
+  for(let i=1;i<=m;i++){
+    B = (E*B)/(E*B + i);
+  }
+  return B;
+}
+function erlangC(E, m){
+  // waiting probability with m agents (m > E)
+  if(m <= E){ return 1.0; }
+  // compute P0 via recursive to keep stability
+  let invFact = [1]; // not needed explicitly; use iterative sum
+  let sum = 0.0;
+  let rho = E/m;
+  let term = 1.0;
+  for(let k=0;k<m;k++){
+    if(k>0){ term *= E/k; }
+    sum += term;
+  }
+  // last term for waiting part
+  let last = (term * E / m) * (1/(1 - rho));
+  let P0 = 1.0 / (sum + last);
+  let Pw = last * P0;
+  return Pw;
+}
+function asaSeconds(E, m, aht){
+  // Average Speed of Answer in seconds using Erlang C
+  const Pw = erlangC(E, m);
+  const mu = 3600.0 / aht; // service rate per agent
+  const denom = m*mu - (E*mu); // = m/ aht * 3600 - lambda
+  if(denom <= 0) return Infinity;
+  const asa = (Pw * aht) / (m - E); // classic approximation
+  return asa;
+}
+function serviceLevel(E, m, aht, T){
+  // SL = 1 - Pw * exp(-(m-E)*(T/aht))
+  const Pw = erlangC(E, m);
+  const expo = Math.exp(-(m - E) * (T / aht));
+  return 1 - Pw * expo;
+}
+function solveAgentsForSL(lambdaPerHour, ahtSec, targetPct, targetSec, occupancyTarget){
+  // search N to meet SL while not exceeding occupancyTarget
+  const E = lambdaPerHour * (ahtSec/3600.0); // erlangs
+  let N = Math.max(1, Math.ceil(E)+1);
+  const maxN = Math.ceil(E)+1000;
+  while(N < maxN){
+    const occ = Math.min(1.0, E / N);
+    const sl = serviceLevel(E, N, ahtSec, targetSec);
+    if(sl >= targetPct && occ <= occupancyTarget){ break; }
+    N++;
+  }
+  return {E, N};
+}
+// ===== Economics & Scenario engine =====
+function modelScenario(params, deltas){
+  // params: baseline inputs; deltas: changes for scenario
+  const p = {...params};
+  // apply deltas
+  const aht = p.aht * (1 + (deltas.dAht || 0)/100);
+  const fcr = Math.min(0.999, Math.max(0.01, p.fcr + (deltas.dFcr || 0)/100));
+  const attr = Math.max(0, p.attr + (deltas.dAttr || 0));
+  const trainFactor = Math.max(0, 1 - (deltas.trainCut || 0)/100);
+
+  // effective arrival with FCR (repeat load multiplier)
+  const fcrMult = 1 / fcr; // lower FCR => more repeat
+  let lambda = p.callsPerHour * (1 + p.forecastErr) * fcrMult;
+
+  // staffing search with occupancy cap
+  const solved = solveAgentsForSL(lambda, aht, p.slp, p.slt, p.occup);
+  let Nprod = solved.N;
+  // gross up for shrinkage
+  let Ngross = Math.ceil(Nprod / (1 - p.shrink));
+  // ASA & Abandon
+  const asa = asaSeconds(solved.E, Nprod, aht);
+  const abandon = 1 - Math.exp(-asa / p.patience);
+
+  // Agentic recovery of abandons
+  let recovered = 0;
+  if(deltas.recover){
+    recovered = abandon * deltas.recover;
+  }
+
+  // Monthly costs
+  const seatCost = Ngross * p.seatCost;
+  const hiresPerMonth = (Ngross * (attr/100)) / 12.0;
+  const trainCost = hiresPerMonth * p.trainCost * trainFactor;
+
+  // Value captured
+  let value = 0;
+  if(deltas.recover){
+    const saved = p.custAtRisk * (deltas.churnRed || 0);
+    value += saved * p.valuePerSave;
+  }
+  // we also include productivity value of reduced repeats vs baseline later by diffing volumes
+
+  return {
+    aht, fcr, attr, lambda, E: solved.E, Nprod, Ngross, asa, abandon, recovered,
+    seatCost, trainCost, value,
+    sl: serviceLevel(solved.E, Nprod, aht, p.slt),
+    occ: Math.min(1.0, solved.E / Nprod)
+  };
+}
+function currency(n){ return "£" + Math.round(n).toLocaleString(); }
+function pct(n){ return (n*100).toFixed(1) + "%"; }
+function pp(n){ return (n).toFixed(1) + " p.p."; }
+
+function runModel(){
+  // collect inputs
+  const callsPerHour = +document.getElementById('callsPerHour').value;
+  const aht = +document.getElementById('aht').value;
+  const slp = +document.getElementById('slp').value/100;
+  const slt = +document.getElementById('slt').value;
+  const forecastErr = +document.getElementById('forecastErr').value/100;
+  const patience = +document.getElementById('patience').value;
+  const shrink = +document.getElementById('shrink').value/100;
+  const occup = +document.getElementById('occup').value/100;
+  const fcr = +document.getElementById('fcr').value/100;
+  const seatCost = +document.getElementById('seatCost').value;
+  const trainCost = +document.getElementById('trainCost').value;
+  const attrition = +document.getElementById('attrition').value;
+  const valuePerSave = +document.getElementById('valuePerSave').value;
+  const custAtRisk = +document.getElementById('custAtRisk').value;
+
+  const prAht = +document.getElementById('prAht').value;
+  const prFcr = +document.getElementById('prFcr').value;
+  const prXfer = +document.getElementById('prXfer').value; // not used explicitly but could feed AHT/FCR
+
+  const aaAht = +document.getElementById('aaAht').value;
+  const aaFcr = +document.getElementById('aaFcr').value;
+  const aaAttr = +document.getElementById('aaAttr').value;
+  const aaTrain = +document.getElementById('aaTrain').value;
+
+  const agRecover = +document.getElementById('agRecover').value/100;
+  const agChurn = +document.getElementById('agChurn').value/100;
+  const agFcr = +document.getElementById('agFcr').value;
+
+  const base = modelScenario({
+    callsPerHour, aht, slp, slt, forecastErr, patience, shrink, occup,
+    fcr, seatCost, trainCost, attr: attrition, valuePerSave, custAtRisk
+  }, {dAht:0,dFcr:0,dAttr:0,trainCut:0});
+
+  const pr = modelScenario({
+    callsPerHour, aht, slp, slt, forecastErr, patience, shrink, occup,
+    fcr, seatCost, trainCost, attr: attrition, valuePerSave, custAtRisk
+  }, {dAht:prAht,dFcr:prFcr,dAttr:0,trainCut:0});
+
+  const aa = modelScenario({
+    callsPerHour, aht, slp, slt, forecastErr, patience, shrink, occup,
+    fcr, seatCost, trainCost, attr: attrition, valuePerSave, custAtRisk
+  }, {dAht:aaAht,dFcr:aaFcr,dAttr:aaAttr,trainCut:aaTrain});
+
+  const ag = modelScenario({
+    callsPerHour, aht, slp, slt, forecastErr, patience, shrink, occup,
+    fcr: Math.min(0.999, fcr + agFcr/100), seatCost, trainCost, attr: attrition,
+    valuePerSave, custAtRisk
+  }, {dAht:0,dFcr:0,dAttr:0,trainCut:0,recover:agRecover,churnRed:agChurn});
+
+  // Productivity value: compare seat + training costs vs baseline and add volume reduction value
+  function monthlyTotals(scn){
+    const cost = scn.seatCost + scn.trainCost;
+    return cost;
+  }
+  const costBase = monthlyTotals(base);
+  const costPR = monthlyTotals(pr);
+  const costAA = monthlyTotals(aa);
+  const costAG = monthlyTotals(ag);
+
+  // Volume benefit proxy: fewer repeats => lower lambda multiplier relative to base
+  const volBenefitPR = Math.max(0, (base.lambda - pr.lambda)) * (base.aht || aht) / 3600 * base.seatCost / Math.max(1, base.Ngross);
+  const volBenefitAA = Math.max(0, (base.lambda - aa.lambda)) * (base.aht || aht) / 3600 * base.seatCost / Math.max(1, base.Ngross);
+  const volBenefitAG = Math.max(0, (base.lambda - ag.lambda)) * (base.aht || aht) / 3600 * base.seatCost / Math.max(1, base.Ngross);
+
+  const benefitPR = (costBase - costPR) + volBenefitPR;
+  const benefitAA = (costBase - costAA) + volBenefitAA;
+  const benefitAG = (costBase - costAG) + volBenefitAG + ag.value;
+
+  // simple ROI: (benefit)/(additional cost vs baseline if positive, else small denom)
+  function roi(benefit, cost){ 
+    const addCost = Math.max(1, cost - costBase);
+    return benefit / addCost;
+  }
+  const rows = [
+    ["Baseline (No AI)", base.Ngross, base.asa, base.abandon, base.sl, costBase, 0, 0],
+    ["Predictive Routing", pr.Ngross, pr.asa, pr.abandon, pr.sl, costPR, benefitPR, roi(benefitPR, costPR)],
+    ["AI Assist", aa.Ngross, aa.asa, aa.abandon, aa.sl, costAA, benefitAA, roi(benefitAA, costAA)],
+    ["Agentic Recovery", ag.Ngross, ag.asa, ag.abandon, ag.sl, costAG, benefitAG, roi(benefitAG, costAG)],
+  ];
+
+  // KPIs (from baseline)
+  document.getElementById('kFTE').textContent = base.Ngross.toLocaleString();
+  document.getElementById('kASA').textContent = Math.round(base.asa).toLocaleString();
+  document.getElementById('kABD').textContent = (base.abandon*100).toFixed(1) + "%";
+  document.getElementById('kSL').textContent = (base.sl*100).toFixed(1) + "%";
+
+  // Summary table
+  let html = "<table><thead><tr><th>Scenario</th><th>FTE (gross)</th><th>ASA (s)</th><th>Abandon %</th><th>SL %</th><th>Cost / mo</th><th>Net Benefit</th><th>ROI</th></tr></thead><tbody>";
+  rows.forEach(r => {
+    html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${Math.round(r[2])}</td><td>${(r[3]*100).toFixed(1)}%</td><td>${(r[4]*100).toFixed(1)}%</td><td>${currency(r[5])}</td><td>${currency(r[6])}</td><td>${(r[7]*100).toFixed(0)}%</td></tr>`
+  });
+  html += "</tbody></table>";
+  document.getElementById('summary').innerHTML = html;
+
+  // Simple SVG bar chart
+  const maxVal = Math.max(costBase,costPR,costAA,costAG, benefitPR,benefitAA,benefitAG) * 1.1;
+  const data = [
+    {name:"Baseline", cost:costBase, benefit:0},
+    {name:"Predictive", cost:costPR, benefit:benefitPR},
+    {name:"AI Assist", cost:costAA, benefit:benefitAA},
+    {name:"Agentic", cost:costAG, benefit:benefitAG},
+  ];
+  const w = 800, h = 200, pad = 40, bw = 30, gap = 60;
+  let svg = `<svg viewBox="0 0 ${w} ${h}" width="100%" height="220">`;
+  // axes
+  svg += `<line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="rgba(255,255,255,0.2)"/>`;
+  // bars
+  data.forEach((d,i)=>{
+    const x = pad + i* (bw*2 + gap);
+    const costH = (d.cost/maxVal)*(h-2*pad);
+    const benH = (d.benefit/maxVal)*(h-2*pad);
+    svg += `<rect x="${x}" y="${h-pad-costH}" width="${bw}" height="${costH}" fill="var(--orange)"></rect>`;
+    svg += `<rect x="${x+bw+6}" y="${h-pad-benH}" width="${bw}" height="${benH}" fill="var(--lime)"></rect>`;
+    svg += `<text x="${x+bw/2}" y="${h-10}" text-anchor="middle" font-size="12" fill="#a3a6b3">${d.name}</text>`;
+  });
+  svg += `</svg>`;
+  document.getElementById('chart').innerHTML = svg;
+}
+
+document.getElementById('runBtn').addEventListener('click', runModel);
+document.addEventListener('DOMContentLoaded', runModel);
+
+// Export snapshot: embeds current inputs in URL hash for sharing
+document.getElementById('shareBtn').addEventListener('click', ()=>{
+  const ids = ["callsPerHour","aht","slp","slt","forecastErr","patience","shrink","occup","fcr","seatCost","trainCost","attrition","valuePerSave","custAtRisk","prAht","prFcr","prXfer","aaAht","aaFcr","aaAttr","aaTrain","agRecover","agChurn","agFcr"];
+  const params = {};
+  ids.forEach(id=>{ params[id]=document.getElementById(id).value; });
+  const hash = btoa(JSON.stringify(params));
+  const url = location.origin + location.pathname + "#" + hash;
+  navigator.clipboard.writeText(url).then(()=>{
+    alert("Sharable snapshot URL copied to clipboard.");
+  });
+});
+// On load, if hash present, restore inputs
+(function(){
+  if(location.hash.length>1){
+    try{
+      const params = JSON.parse(atob(location.hash.substring(1)));
+      Object.entries(params).forEach(([k,v])=>{
+        const el = document.getElementById(k);
+        if(el) el.value = v;
+      });
+    }catch(e){}
+  }
+})();
+</script>
+
+
+</body></html>
